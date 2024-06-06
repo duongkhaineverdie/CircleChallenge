@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Circle Challenge</string>
+    <string name="label_your_turn">Your Turn</string>
+    <string name="name_player_computer">Player AI</string>
+    <string name="label_replay">Replay</string>
+    <string name="label_select">Select</string>
+    <string name="label_game_won">Game Won</string>
+    <string name="label_start_game">Start VS AI</string>
+    <string name="label_time_left">Time left</string>
+    <string name="time_left_regex">%s s</string>
+    <string name="name_player_real">You</string>
+    <string name="label_computer_turn">AI\'s Turn</string>
+    <string name="version_app">Version</string>
+    <string name="label_more">More</string>
+    <string name="label_sound">Sound</string>
+    <string name="label_game">Game</string>
+    <string name="label_on">On</string>
+    <string name="label_off">Off</string>
+    <string name="label_levels">Levels</string>
+    <string name="label_easy">Easy</string>
+    <string name="label_evil">Evil</string>
+    <string name="label_new_best">New Best!</string>
+</resources>
