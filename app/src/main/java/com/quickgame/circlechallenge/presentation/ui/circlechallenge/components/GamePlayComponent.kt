@@ -1,34 +1,27 @@
 package com.quickgame.circlechallenge.presentation.ui.circlechallenge.components
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.with
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,24 +33,27 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.draw
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.quickgame.circlechallenge.R
 import com.quickgame.circlechallenge.presentation.ui.theme.CircleChallengeTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.PI
-import kotlin.math.absoluteValue
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
@@ -66,17 +62,18 @@ import kotlin.random.Random
 fun GamePlayComponent(
     modifier: Modifier = Modifier,
     paddingAreaPlayerMove: Dp = 50.dp,
-    playerSpeed: Float = 20f,
-    playerSize: Float = 80f,
-    obstaclesSize: Float = 50f,
+    playerSpeed: Float = 15f,
+    playerSize: Float = 100f,
+    obstaclesRadius: Float = 100f,
     playerColor: Color = Color(0xFF4AF4AA),
     onDefeat: (Int) -> Unit = {/* no-op */ },
-    onClickGame: () -> Unit = {/* no-op */}
+    onClickGame: () -> Unit = {/* no-op */ },
+    avatarId: Int = R.drawable.img_1
 ) {
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
     val screenHeight = with(density) {
-        configuration.screenHeightDp.dp.toPx() - 399f
+        configuration.screenHeightDp.dp.toPx()
     }
     val screenWidth = with(density) {
         configuration.screenWidthDp.dp.toPx()
@@ -85,7 +82,7 @@ fun GamePlayComponent(
     // State to hold the falling objects
     var fallingObjects by remember { mutableStateOf(listOf<FallingObject>()) }
     val playerX = remember { mutableFloatStateOf(screenWidth / 2) }
-    val playerY = screenHeight / 2 - playerSize / 2
+    val playerY = (screenHeight) / 2 - playerSize / 2
     var playerDirection by remember { mutableStateOf(true) }
 
     var isPlayerBroken by remember { mutableStateOf(false) }
@@ -95,8 +92,11 @@ fun GamePlayComponent(
 
     var timePlayed by remember { mutableIntStateOf(0) }
 
+    val imageBitmap = ImageBitmap.imageResource(id = avatarId)
+
+
     LaunchedEffect(key1 = isPlayerBroken) {
-        if (isPlayerBroken){
+        if (isPlayerBroken) {
             onDefeat(timePlayed)
         }
     }
@@ -115,7 +115,7 @@ fun GamePlayComponent(
                 val newObject = FallingObject(
                     startX = Random.nextFloat() * screenWidth,
                     endX = Random.nextFloat() * screenWidth,
-                    size = obstaclesSize,
+                    size = obstaclesRadius,
                     speed = 5f + Random.nextFloat() * 5f,
                     rotationAngle = 360f - Random.nextFloat() * 720f,
                     yAnimatable = Animatable(0f)
@@ -228,12 +228,137 @@ fun GamePlayComponent(
             }
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            drawRoundRect(
-                color = Color(0xFF101827),
-                topLeft = Offset(0f + paddingAreaPlayerMove.toPx(), playerY),
-                size = Size(screenWidth - paddingAreaPlayerMove.toPx() * 2, playerSize),
-                cornerRadius = CornerRadius(screenWidth)
+            val height = size.height
+            val heightFirstLine = height / 18
+            repeat(18) {
+                val offset = heightFirstLine * it
+                val colorLine = if (it % 2 == 0)
+                    Color(0xFF39B549)
+                else
+                    Color(0xFF289444)
+                drawRect(
+                    color = colorLine,
+                    topLeft = Offset(0f, offset),
+                    size = Size(screenWidth, heightFirstLine),
+                )
+            }
+        }
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding()
+        ) {
+            val canvasWidth = size.width
+            val canvasHeight = size.height
+            val pitchPadding = 50f
+            val pitchWidth = canvasWidth - 2 * pitchPadding
+            val pitchHeight = canvasHeight - 2 * pitchPadding
+            val centerX = pitchPadding + pitchWidth / 2
+            val centerY = pitchPadding + pitchHeight / 2
+            val centerCircleRadius = 100f
+            val goalAreaWidth = 200f
+            val goalAreaHeight = 100f
+
+            drawLine(
+                color = Color.White,
+                start = Offset(pitchPadding, pitchPadding),
+                end = Offset(pitchPadding + pitchWidth, pitchPadding),
+                strokeWidth = 5f
             )
+            drawLine(
+                color = Color.White,
+                start = Offset(pitchPadding, pitchPadding),
+                end = Offset(pitchPadding, pitchPadding + pitchHeight),
+                strokeWidth = 5f
+            )
+            drawLine(
+                color = Color.White,
+                start = Offset(pitchPadding + pitchWidth, pitchPadding),
+                end = Offset(pitchPadding + pitchWidth, pitchPadding + pitchHeight),
+                strokeWidth = 5f
+            )
+            drawLine(
+                color = Color.White,
+                start = Offset(pitchPadding, pitchPadding + pitchHeight),
+                end = Offset(pitchPadding + pitchWidth, pitchPadding + pitchHeight),
+                strokeWidth = 5f
+            )
+
+            // Draw the center circle
+            drawCircle(
+                color = Color.White,
+                radius = centerCircleRadius,
+                center = Offset(centerX, centerY),
+                style = Stroke(width = 5f)
+            )
+            drawCircle(
+                color = Color.White,
+                radius = 10f,
+                center = Offset(centerX, centerY),
+            )
+
+            // Draw the halfway line
+            drawLine(
+                color = Color.White,
+                start = Offset(pitchPadding, centerY),
+                end = Offset(pitchPadding + pitchWidth, centerY),
+                strokeWidth = 5f
+            )
+
+            // Draw goal areas
+            drawRect(
+                color = Color.White,
+                topLeft = Offset(centerX - goalAreaWidth / 2, pitchPadding),
+                size = Size(goalAreaWidth, goalAreaHeight),
+                style = Stroke(width = 5f)
+            )
+            drawRect(
+                color = Color.White,
+                topLeft = Offset(
+                    centerX - goalAreaWidth / 2,
+                    pitchPadding + pitchHeight - goalAreaHeight
+                ),
+                size = Size(goalAreaWidth, goalAreaHeight),
+                style = Stroke(width = 5f)
+            )
+
+            // Draw the penalty areas
+            val penaltyAreaWidth = 500f
+            val penaltyAreaHeight = 200f
+            drawRect(
+                color = Color.White,
+                topLeft = Offset(centerX - penaltyAreaWidth / 2, pitchPadding),
+                size = Size(penaltyAreaWidth, penaltyAreaHeight),
+                style = Stroke(width = 5f)
+            )
+            drawRect(
+                color = Color.White,
+                topLeft = Offset(
+                    centerX - penaltyAreaWidth / 2,
+                    pitchPadding + pitchHeight - penaltyAreaHeight
+                ),
+                size = Size(penaltyAreaWidth, penaltyAreaHeight),
+                style = Stroke(width = 5f)
+            )
+
+            // Draw goal
+            drawRect(
+                color = Color.White,
+                topLeft = Offset(centerX - goalAreaWidth / 4, pitchPadding - goalAreaHeight / 3),
+                size = Size(goalAreaWidth / 2, goalAreaHeight / 3),
+                style = Stroke(width = 5f)
+            )
+
+            drawRect(
+                color = Color.White,
+                topLeft = Offset(
+                    centerX - goalAreaWidth / 4,
+                    pitchPadding + pitchHeight
+                ),
+                size = Size(goalAreaWidth / 2, goalAreaHeight / 3),
+                style = Stroke(width = 5f)
+            )
+
 
             // Draw falling objects
             fallingObjects.forEach { obj ->
@@ -242,12 +367,8 @@ fun GamePlayComponent(
                 rotate(
                     obj.rotationAngle * (obj.yAnimatable.value / screenHeight),
                     pivot = Offset(currentX, obj.yAnimatable.value)
-                ) {
-                    drawRect(
-                        color = Color.White,
-                        topLeft = Offset(currentX, obj.yAnimatable.value),
-                        size = Size(obj.size, obj.size),
-                    )
+                ) {// Draw the ball
+                    drawDetailedBall(Offset(currentX, obj.yAnimatable.value), obstaclesRadius)
                 }
             }
 
@@ -261,18 +382,23 @@ fun GamePlayComponent(
                 )
             }
             if (!isPlayerBroken) {
-                drawRoundRect(
-                    color = playerColor,
-                    topLeft = Offset(playerX.floatValue - playerSize / 2, playerY),
-                    size = Size(playerSize, playerSize),
-                    cornerRadius = CornerRadius(screenWidth)
+                drawImage(
+                    image = imageBitmap,
+                    dstSize = IntSize(
+                        playerSize.toInt(),
+                        playerSize.toInt(),
+                    ),
+                    filterQuality = FilterQuality.Medium,
+                    dstOffset = IntOffset((playerX.floatValue - playerSize / 2).toInt(),
+                        playerY.toInt()
+                    ),
                 )
             }
         }
         AnimatedContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 50.dp),
+                .padding(bottom = 100.dp),
             targetState = timePlayed,
             transitionSpec = {
                 // Compare the incoming number with the previous number.
@@ -328,6 +454,48 @@ data class PlayerPiece(
     val speedX: Float,
     val speedY: Float
 )
+
+fun DrawScope.drawDetailedBall(position: Offset, radius: Float) {
+    drawCircle(
+        color = Color.White,
+        radius = radius,
+        center = position
+    )
+
+    val blackHexagonRadius = radius / 3
+    val whiteHexagonRadius = radius / 3.5f
+
+    // Draw central hexagon
+    drawHexagon(position, blackHexagonRadius, Color.Black)
+
+    // Draw surrounding hexagons
+    val angle = 60f
+    for (i in 0..5) {
+        val rad = Math.toRadians((angle * i).toDouble())
+        val hexagonCenter = Offset(
+            x = position.x + (cos(rad) * radius).toFloat() / 1.5f,
+            y = position.y + (sin(rad) * radius).toFloat() / 1.5f
+        )
+        drawHexagon(hexagonCenter, whiteHexagonRadius, Color.Black)
+    }
+}
+
+fun DrawScope.drawHexagon(center: Offset, radius: Float, color: Color) {
+    val path = androidx.compose.ui.graphics.Path()
+    val angle = 60f
+    for (i in 0 until 6) {
+        val rad = Math.toRadians((angle * i).toDouble())
+        val x = center.x + (cos(rad) * radius).toFloat()
+        val y = center.y + (sin(rad) * radius).toFloat()
+        if (i == 0) {
+            path.moveTo(x, y)
+        } else {
+            path.lineTo(x, y)
+        }
+    }
+    path.close()
+    drawPath(path, color)
+}
 
 @Preview(name = "GamePlayComponent", showSystemUi = true)
 @Composable

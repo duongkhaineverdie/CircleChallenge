@@ -3,7 +3,9 @@ package com.quickgame.circlechallenge.presentation.ui.circlechallenge
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.quickgame.circlechallenge.R
 import com.quickgame.circlechallenge.data.soundmanager.SoundManager
+import com.quickgame.circlechallenge.domain.interactors.GetAvtIdUseCase
 import com.quickgame.circlechallenge.domain.interactors.GetBestScoreUseCase
 import com.quickgame.circlechallenge.domain.interactors.GetStatusPlaySoundUseCase
 import com.quickgame.circlechallenge.domain.interactors.SaveBestScoreUseCase
@@ -18,8 +20,9 @@ class CircleChallengeViewModel(
     savedStateHandle: SavedStateHandle,
     private val getStatusPlaySoundUseCase: GetStatusPlaySoundUseCase,
     private val soundManager: SoundManager,
-    private val getHighScoreUseCase: GetBestScoreUseCase,
-    private val saveHighScoreUseCase: SaveBestScoreUseCase,
+    private val getBestScoreUseCase: GetBestScoreUseCase,
+    private val saveBestScoreUseCase: SaveBestScoreUseCase,
+    private val getAvtIdUseCase: GetAvtIdUseCase,
 ) : ViewModel() {
 
     private val _stateFlow: MutableStateFlow<CircleChallengeState> =
@@ -30,17 +33,36 @@ class CircleChallengeViewModel(
     init {
         getStatusPlayingSound()
         getBestScore()
+        getIdAvatarPlayer()
+    }
+
+    private fun getIdAvatarPlayer() {
+        viewModelScope.launch {
+            getAvtIdUseCase(Unit).collectLatest { result ->
+                result.onSuccess { value ->
+                    _stateFlow.update {
+                        it.copy(
+                            avatarPlayerId = value,
+                        )
+                    }
+                }
+            }
+        }
     }
 
     fun onDefeat(score: Int) {
+        val isBestScore = if (stateFlow.value.bestScore < score) {
+            saveBestScore(score)
+            true
+        } else {
+            false
+        }
         _stateFlow.update {
             it.copy(
                 score = score,
-                isDefeat = true
+                isDefeat = true,
+                isBestScore = isBestScore
             )
-        }
-        if (stateFlow.value.bestScore < score) {
-            saveBestScore(score)
         }
     }
 
@@ -60,7 +82,7 @@ class CircleChallengeViewModel(
 
     private fun getBestScore() {
         viewModelScope.launch {
-            getHighScoreUseCase(Unit).collectLatest { result ->
+            getBestScoreUseCase(Unit).collectLatest { result ->
                 result.onSuccess { value ->
                     _stateFlow.update {
                         it.copy(
@@ -74,7 +96,7 @@ class CircleChallengeViewModel(
 
     private fun saveBestScore(score: Int) {
         viewModelScope.launch {
-            saveHighScoreUseCase(score).onSuccess {
+            saveBestScoreUseCase(score).onSuccess {
                 getBestScore()
             }
         }
@@ -108,4 +130,6 @@ data class CircleChallengeState(
     val score: Int = 0,
     val isPlayingSoundClick: Boolean = false,
     val bestScore: Int = 0,
+    val avatarPlayerId: Int = R.drawable.img_1,
+    val isBestScore: Boolean = false,
 )

@@ -4,7 +4,7 @@ import com.quickgame.circlechallenge.data.repository.IRepository
 import com.quickgame.circlechallenge.domain.interactors.type.TrueColorBaseUseCase
 import kotlinx.coroutines.CoroutineDispatcher
 
-class SetStatusPlaySoundUseCaseMatchGame(
+class SetStatusPlayingSoundUseCase(
     private val repository: IRepository,
     dispatcher: CoroutineDispatcher,
 ) : TrueColorBaseUseCase<Boolean, Unit>(dispatcher) {

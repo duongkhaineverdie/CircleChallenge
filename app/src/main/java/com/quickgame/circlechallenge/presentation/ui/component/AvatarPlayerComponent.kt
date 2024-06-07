@@ -1,6 +1,7 @@
 package com.quickgame.circlechallenge.presentation.ui.component
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -14,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
@@ -27,7 +29,7 @@ fun AvatarPlayerComponent(
     modifier: Modifier = Modifier,
     resId: Int = R.drawable.img_1,
     onClick: () -> Unit = {/* no-op */ },
-    isShowFrame: Boolean = true,
+    isShowFrame: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -61,7 +63,13 @@ fun AvatarPlayerComponent(
             Image(
                 painter = painterResource(id = resId),
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(0.8f),
+                modifier = Modifier
+                    .fillMaxSize(0.8f)
+                    .border(
+                        width = 1.dp,
+                        color = Color.White,
+                        shape = CircleShape
+                    ),
                 contentScale = ContentScale.Crop,
                 colorFilter = if (isPressed) ColorFilter.colorMatrix(matrix) else null
             )

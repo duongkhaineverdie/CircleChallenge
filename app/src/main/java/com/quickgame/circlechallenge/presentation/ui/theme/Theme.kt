@@ -58,8 +58,8 @@ fun CircleChallengeTheme(
         typography = Typography,
         content = {
             ProvideTextStyle(
-                value = TextStyle(color = Color.White),
-                content = content
+                value = TextStyle(color = Color.White, fontFamily = fontFamilyApp),
+                content = content,
             )
         }
     )

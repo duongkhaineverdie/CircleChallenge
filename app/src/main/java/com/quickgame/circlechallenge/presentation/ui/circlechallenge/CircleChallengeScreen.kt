@@ -22,7 +22,10 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -45,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,8 +74,9 @@ fun CircleChallengeScreen(navController: NavHostController) {
             circleChallengeViewModel.playSoundLose()
             circleChallengeViewModel.onDefeat(score = it)
         },
-        bestScore = uiState.bestScore,
         score = uiState.score,
+        avatarPlayerId = uiState.avatarPlayerId,
+        isBestScore = uiState.isBestScore,
         onBack = {
             circleChallengeViewModel.playSoundClick()
             navController.popBackStack()
@@ -94,9 +99,10 @@ fun CircleChallengeScreen(navController: NavHostController) {
 @Composable
 fun CircleChallengeScreen(
     modifier: Modifier = Modifier,
-    isDefeated: Boolean = true,
-    bestScore: Int = 0,
+    isDefeated: Boolean = false,
     score: Int = 0,
+    avatarPlayerId: Int = R.drawable.img_1,
+    isBestScore: Boolean = false,
     onDefeat: (Int) -> Unit = {/* no-op */ },
     onBack: () -> Unit = {/* no-op */ },
     onRestart: () -> Unit = {/* no-op */ },
@@ -141,12 +147,16 @@ fun CircleChallengeScreen(
                         fontWeight = FontWeight.Bold,
                         fontSize = 150.sp,
                     )
-                    Log.d(TAG, "CircleChallengeScreen: $score - $bestScore")
-                    if (score > bestScore) {
+                    if (isBestScore) {
                         Text(
                             text = stringResource(id = R.string.label_new_best),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 50.sp
+                            fontSize = 50.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp),
+                            lineHeight = 50.sp
                         )
                     }
                     Spacer(modifier = Modifier.height(30.dp))
@@ -214,7 +224,8 @@ fun CircleChallengeScreen(
             } else {
                 GamePlayComponent(
                     onDefeat = onDefeat,
-                    onClickGame = onClickGame
+                    onClickGame = onClickGame,
+                    avatarId = avatarPlayerId
                 )
             }
         }
@@ -227,7 +238,7 @@ fun CircleChallengeScreen(
 private fun CircleChallengeScreenPreview() {
     CircleChallengeTheme {
         CircleChallengeScreen(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         )
     }
 }

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.quickgame.circlechallenge.BuildConfig
 import com.quickgame.circlechallenge.data.soundmanager.SoundManager
 import com.quickgame.circlechallenge.domain.interactors.GetStatusPlaySoundUseCase
-import com.quickgame.circlechallenge.domain.interactors.SetStatusPlaySoundUseCaseMatchGame
+import com.quickgame.circlechallenge.domain.interactors.SetStatusPlayingSoundUseCase
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
@@ -18,7 +18,7 @@ import java.io.File
 class SettingViewModel(
     savedStateHandle: SavedStateHandle,
     private val getStatusPlaySoundUseCase: GetStatusPlaySoundUseCase,
-    private val setStatusPlaySoundUseCaseMatchGame: SetStatusPlaySoundUseCaseMatchGame,
+    private val setStatusPlayingSoundUseCase: SetStatusPlayingSoundUseCase,
     private val soundManager: SoundManager,
     private val context: Application
 ) : ViewModel() {
@@ -82,13 +82,13 @@ class SettingViewModel(
 
     fun setStatusPlaySound() {
         viewModelScope.launch {
-            setStatusPlaySoundUseCaseMatchGame(!stateFlow.value.isPlayingSoundClick)
+            setStatusPlayingSoundUseCase(!stateFlow.value.isPlayingSoundClick)
         }
     }
 
     private fun setIsPlayingSoundAfterClearCache(){
         viewModelScope.launch {
-            setStatusPlaySoundUseCaseMatchGame(true)
+            setStatusPlayingSoundUseCase(true)
         }
     }
 

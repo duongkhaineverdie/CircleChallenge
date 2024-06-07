@@ -22,6 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -90,7 +91,7 @@ fun HomeScreen(
                     end.linkTo(parent.end)
                 }
                 .fillMaxWidth()
-                .padding(horizontal = 30.dp),
+                .padding(horizontal = 20.dp),
         ) {
             AvatarPlayerComponent(
                 modifier = Modifier
@@ -102,7 +103,7 @@ fun HomeScreen(
             GameDefaultButton(
                 modifier = Modifier
                     .height(IntrinsicSize.Min)
-                    .fillMaxWidth(0.5f)
+                    .fillMaxWidth(0.6f)
                     .align(Alignment.Center),
                 color = BackgroundBoardGameColor,
                 paddingEffect = 5.dp,
@@ -117,14 +118,15 @@ fun HomeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = stringResource(id = R.string.label_game_won),
+                        text = stringResource(id = R.string.label_time_best_match),
                         modifier = Modifier,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
-                        color = Color.White
+                        color = Color.White,
+                        textAlign = TextAlign.Center
                     )
                     Text(
-                        text = highScore.toString(),
+                        text = stringResource(id = R.string.label_time_regex, highScore.toString()),
                         color = Color.White,
                         fontSize = 30.sp
                     )
@@ -140,7 +142,7 @@ fun HomeScreen(
         GameDefaultButton(
             modifier = Modifier
                 .height(IntrinsicSize.Min)
-                .padding(horizontal = 100.dp),
+                .padding(horizontal = 80.dp),
             color = BackgroundBoardGameColor,
             paddingEffect = 5.dp,
             onClick = onStartGame
@@ -148,7 +150,8 @@ fun HomeScreen(
             Text(
                 text = stringResource(id = R.string.label_start_game),
                 fontSize = 24.sp,
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier.padding(20.dp),
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -167,6 +170,7 @@ fun HomeScreenPreview() {
         HomeScreen(
             modifier = Modifier
                 .fillMaxSize(),
+            isShowDialogChooseAvatar = false
         )
     }
 }

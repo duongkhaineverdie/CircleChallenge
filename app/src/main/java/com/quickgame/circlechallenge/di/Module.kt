@@ -8,7 +8,7 @@ import com.quickgame.circlechallenge.domain.interactors.GetBestScoreUseCase
 import com.quickgame.circlechallenge.domain.interactors.GetStatusPlaySoundUseCase
 import com.quickgame.circlechallenge.domain.interactors.SaveBestScoreUseCase
 import com.quickgame.circlechallenge.domain.interactors.SetAvtIdUseCase
-import com.quickgame.circlechallenge.domain.interactors.SetStatusPlaySoundUseCaseMatchGame
+import com.quickgame.circlechallenge.domain.interactors.SetStatusPlayingSoundUseCase
 import com.quickgame.circlechallenge.domain.repository.RepositoryImpl
 import com.quickgame.circlechallenge.presentation.MainViewModel
 import com.quickgame.circlechallenge.presentation.ui.circlechallenge.CircleChallengeViewModel
@@ -39,7 +39,7 @@ val useCaseModule = module {
     factoryOf(::SaveBestScoreUseCase)
     factoryOf(::GetAvtIdUseCase)
     factoryOf(::SetAvtIdUseCase)
-    factoryOf(::SetStatusPlaySoundUseCaseMatchGame)
+    factoryOf(::SetStatusPlayingSoundUseCase)
     factoryOf(::GetStatusPlaySoundUseCase)
 }
 
