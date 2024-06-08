@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quickgame.circlechallenge.R
+import com.quickgame.circlechallenge.data.mediaplayer.MediaPlayerManager
 import com.quickgame.circlechallenge.data.soundmanager.SoundManager
 import com.quickgame.circlechallenge.domain.interactors.GetAvtIdUseCase
 import com.quickgame.circlechallenge.domain.interactors.GetBestScoreUseCase
@@ -93,7 +94,6 @@ class HomeViewModel(
             soundManager.playSound()
         }
     }
-
 }
 
 data class HomeUiState(

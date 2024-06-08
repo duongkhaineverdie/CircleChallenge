@@ -3,7 +3,6 @@ package com.quickgame.circlechallenge.presentation.ui.circlechallenge.components
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
@@ -11,9 +10,10 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Text
@@ -35,10 +35,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
@@ -50,7 +48,11 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.quickgame.circlechallenge.R
+import com.quickgame.circlechallenge.data.model.FallingObject
+import com.quickgame.circlechallenge.data.model.PlayerPiece
 import com.quickgame.circlechallenge.presentation.ui.theme.CircleChallengeTheme
+import com.quickgame.circlechallenge.utils.Constants
+import com.quickgame.circlechallenge.utils.drawDetailedBall
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.PI
@@ -61,13 +63,10 @@ import kotlin.random.Random
 @Composable
 fun GamePlayComponent(
     modifier: Modifier = Modifier,
-    paddingAreaPlayerMove: Dp = 50.dp,
-    playerSpeed: Float = 15f,
-    playerSize: Float = 100f,
-    obstaclesRadius: Float = 100f,
+    playerDpSize: Dp = 40.dp,
+    obstaclesRadiusDp: Dp = 30.dp,
     playerColor: Color = Color(0xFF4AF4AA),
     onDefeat: (Int) -> Unit = {/* no-op */ },
-    onClickGame: () -> Unit = {/* no-op */ },
     avatarId: Int = R.drawable.img_1
 ) {
     val configuration = LocalConfiguration.current
@@ -78,12 +77,13 @@ fun GamePlayComponent(
     val screenWidth = with(density) {
         configuration.screenWidthDp.dp.toPx()
     }
+    val playerSize = with(density) { playerDpSize.toPx() }
+    val obstaclesRadius = with(density) { obstaclesRadiusDp.toPx() }
 
     // State to hold the falling objects
     var fallingObjects by remember { mutableStateOf(listOf<FallingObject>()) }
     val playerX = remember { mutableFloatStateOf(screenWidth / 2) }
     val playerY = (screenHeight) / 2 - playerSize / 2
-    var playerDirection by remember { mutableStateOf(true) }
 
     var isPlayerBroken by remember { mutableStateOf(false) }
 
@@ -161,7 +161,7 @@ fun GamePlayComponent(
                         offset = Offset(currentX, obj.yAnimatable.value),
                         size = Size(obj.size, obj.size),
                     )
-                    rectIntersects(playerRect, objRect)
+                    Constants.rectIntersects(playerRect, objRect)
                 }
                 if (collision) {
                     // Handle game over or collision
@@ -199,34 +199,7 @@ fun GamePlayComponent(
         }
     }
 
-    // Update player position
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(16L)
-            if (playerDirection) {
-                playerX.floatValue += playerSpeed
-                if (playerX.floatValue >= screenWidth - playerSize - with(density) { paddingAreaPlayerMove.toPx() }) {
-                    playerDirection = false
-                }
-            } else {
-                playerX.floatValue -= playerSpeed
-                if (playerX.floatValue <= 0 + with(density) { paddingAreaPlayerMove.toPx() } + playerSize) {
-                    playerDirection = true
-                }
-            }
-        }
-    }
-
-    Box(
-        modifier
-            .pointerInput(Unit) {
-                detectTapGestures {
-                    // Change player direction immediately on tap
-                    onClickGame()
-                    playerDirection = !playerDirection
-                }
-            }
-    ) {
+    Box(modifier) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val height = size.height
             val heightFirstLine = height / 18
@@ -389,7 +362,8 @@ fun GamePlayComponent(
                         playerSize.toInt(),
                     ),
                     filterQuality = FilterQuality.Medium,
-                    dstOffset = IntOffset((playerX.floatValue - playerSize / 2).toInt(),
+                    dstOffset = IntOffset(
+                        (playerX.floatValue - playerSize / 2).toInt(),
                         playerY.toInt()
                     ),
                 )
@@ -397,8 +371,8 @@ fun GamePlayComponent(
         }
         AnimatedContent(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 100.dp),
+                .align(Alignment.TopCenter)
+                .padding(top = 100.dp),
             targetState = timePlayed,
             transitionSpec = {
                 // Compare the incoming number with the previous number.
@@ -427,74 +401,16 @@ fun GamePlayComponent(
                 fontSize = 150.sp,
             )
         }
-    }
-}
 
-// Function to check if two rectangles intersect
-fun rectIntersects(rect1: Rect, rect2: Rect): Boolean {
-    return (rect1.left < rect2.right && rect1.right > rect2.left
-            && rect1.top < rect2.bottom && rect1.bottom > rect2.top)
-}
-
-
-data class FallingObject(
-    val startX: Float,
-    val endX: Float,
-    val size: Float,
-    val speed: Float,
-    val rotationAngle: Float, // Angle of rotation
-    val yAnimatable: Animatable<Float, AnimationVector1D>
-)
-
-data class PlayerPiece(
-    val x: Float,
-    val y: Float,
-    val angle: Float,
-    val size: Float,
-    val speedX: Float,
-    val speedY: Float
-)
-
-fun DrawScope.drawDetailedBall(position: Offset, radius: Float) {
-    drawCircle(
-        color = Color.White,
-        radius = radius,
-        center = position
-    )
-
-    val blackHexagonRadius = radius / 3
-    val whiteHexagonRadius = radius / 3.5f
-
-    // Draw central hexagon
-    drawHexagon(position, blackHexagonRadius, Color.Black)
-
-    // Draw surrounding hexagons
-    val angle = 60f
-    for (i in 0..5) {
-        val rad = Math.toRadians((angle * i).toDouble())
-        val hexagonCenter = Offset(
-            x = position.x + (cos(rad) * radius).toFloat() / 1.5f,
-            y = position.y + (sin(rad) * radius).toFloat() / 1.5f
-        )
-        drawHexagon(hexagonCenter, whiteHexagonRadius, Color.Black)
-    }
-}
-
-fun DrawScope.drawHexagon(center: Offset, radius: Float, color: Color) {
-    val path = androidx.compose.ui.graphics.Path()
-    val angle = 60f
-    for (i in 0 until 6) {
-        val rad = Math.toRadians((angle * i).toDouble())
-        val x = center.x + (cos(rad) * radius).toFloat()
-        val y = center.y + (sin(rad) * radius).toFloat()
-        if (i == 0) {
-            path.moveTo(x, y)
-        } else {
-            path.lineTo(x, y)
+        TouchPad(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp)
+                .align(Alignment.BottomCenter)
+        ) { dragAmount ->
+            playerX.floatValue = (playerX.floatValue + dragAmount).coerceIn(playerSize, screenWidth - playerSize)
         }
     }
-    path.close()
-    drawPath(path, color)
 }
 
 @Preview(name = "GamePlayComponent", showSystemUi = true)

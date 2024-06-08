@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quickgame.circlechallenge.R
+import com.quickgame.circlechallenge.data.mediaplayer.MediaPlayerManager
 import com.quickgame.circlechallenge.data.soundmanager.SoundManager
 import com.quickgame.circlechallenge.domain.interactors.GetAvtIdUseCase
 import com.quickgame.circlechallenge.domain.interactors.GetBestScoreUseCase
@@ -35,7 +36,6 @@ class CircleChallengeViewModel(
         getBestScore()
         getIdAvatarPlayer()
     }
-
     private fun getIdAvatarPlayer() {
         viewModelScope.launch {
             getAvtIdUseCase(Unit).collectLatest { result ->
@@ -128,7 +128,7 @@ data class CircleChallengeState(
     val selectedColor: Int = 0,
     val isDefeat: Boolean = false,
     val score: Int = 0,
-    val isPlayingSoundClick: Boolean = false,
+    val isPlayingSoundClick: Boolean = true,
     val bestScore: Int = 0,
     val avatarPlayerId: Int = R.drawable.img_1,
     val isBestScore: Boolean = false,

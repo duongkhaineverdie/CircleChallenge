@@ -1,6 +1,7 @@
 package com.quickgame.circlechallenge.di
 
 import com.quickgame.circlechallenge.data.datastore.DataStore
+import com.quickgame.circlechallenge.data.mediaplayer.MediaPlayerManager
 import com.quickgame.circlechallenge.data.repository.IRepository
 import com.quickgame.circlechallenge.data.soundmanager.SoundManager
 import com.quickgame.circlechallenge.domain.interactors.GetAvtIdUseCase
@@ -20,7 +21,7 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val viewModelModule = module {
-    single { MainViewModel() }
+    singleOf(::MainViewModel)
     factoryOf(::HomeViewModel)
     factoryOf(::SettingViewModel)
     factoryOf(::CircleChallengeViewModel)
@@ -48,5 +49,6 @@ val repositoryModule = module {
 }
 
 val mediaPlayerModule = module {
+    singleOf(::MediaPlayerManager)
     singleOf(::SoundManager)
 }

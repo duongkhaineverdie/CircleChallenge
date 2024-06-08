@@ -1,5 +1,6 @@
 package com.quickgame.circlechallenge.utils
 
+import androidx.compose.ui.geometry.Rect
 import com.quickgame.circlechallenge.R
 
 object Constants {
@@ -30,6 +31,12 @@ object Constants {
             R.drawable.img_19,
             R.drawable.img_20,
         )
+    }
+
+    // Function to check if two rectangles intersect
+    fun rectIntersects(rect1: Rect, rect2: Rect): Boolean {
+        return (rect1.left < rect2.right && rect1.right > rect2.left
+                && rect1.top < rect2.bottom && rect1.bottom > rect2.top)
     }
 }
 

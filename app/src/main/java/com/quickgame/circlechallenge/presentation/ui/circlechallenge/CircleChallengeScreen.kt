@@ -90,9 +90,6 @@ fun CircleChallengeScreen(navController: NavHostController) {
             circleChallengeViewModel.playSoundClick()
             navController.navigate(Destination.SettingScreen.fullRoute)
         },
-        onClickGame = {
-            circleChallengeViewModel.playSoundClick()
-        }
     )
 }
 
@@ -107,7 +104,6 @@ fun CircleChallengeScreen(
     onBack: () -> Unit = {/* no-op */ },
     onRestart: () -> Unit = {/* no-op */ },
     onSetting: () -> Unit = {/* no-op */ },
-    onClickGame: () -> Unit = {/* no-op */ },
 ) {
     Box(
         modifier = modifier
@@ -224,7 +220,6 @@ fun CircleChallengeScreen(
             } else {
                 GamePlayComponent(
                     onDefeat = onDefeat,
-                    onClickGame = onClickGame,
                     avatarId = avatarPlayerId
                 )
             }
@@ -239,6 +234,7 @@ private fun CircleChallengeScreenPreview() {
     CircleChallengeTheme {
         CircleChallengeScreen(
             modifier = Modifier.fillMaxSize(),
+            isDefeated = false,
         )
     }
 }

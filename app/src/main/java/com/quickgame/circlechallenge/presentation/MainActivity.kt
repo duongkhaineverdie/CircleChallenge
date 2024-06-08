@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,11 +20,16 @@ import com.quickgame.circlechallenge.domain.navigation.NavHostTrueColor
 import com.quickgame.circlechallenge.domain.navigation.composable
 import com.quickgame.circlechallenge.presentation.ui.circlechallenge.CircleChallengeScreen
 import com.quickgame.circlechallenge.presentation.ui.home.HomeScreen
+import com.quickgame.circlechallenge.presentation.ui.home.HomeViewModel
 import com.quickgame.circlechallenge.presentation.ui.setting.SettingScreen
 import com.quickgame.circlechallenge.presentation.ui.theme.CircleChallengeTheme
+import org.koin.android.ext.android.getKoin
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
 
+    private val koin = getKoin()
+    private val mainViewModel: MainViewModel = koin.get<MainViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -57,6 +63,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onPause() {
+        mainViewModel.onPause()
+        super.onPause()
+    }
+    override fun onResume() {
+        mainViewModel.onResume()
+        super.onResume()
+    }
 
 }
 
